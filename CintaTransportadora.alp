@@ -276,7 +276,7 @@
 						<OccurrenceAtTime>true</OccurrenceAtTime>
 						<OccurrenceDate>1736496000000</OccurrenceDate>
 						<OccurrenceTime Class="CodeUnitValue">
-							<Code><![CDATA[2]]></Code>
+							<Code><![CDATA[1]]></Code>
 							<Unit Class="TimeUnits"><![CDATA[SECOND]]></Unit>
 						</OccurrenceTime>
 						<RecurrenceCode Class="CodeUnitValue">
@@ -334,8 +334,33 @@ System.out.println("Esfuezo: " + effortLevel + ", Velocidad de enfriamiento: " +
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
 					<ShowLabel>true</ShowLabel>
-					<Body><![CDATA[datasetMotor.setCellValue("Temperatura", 1, 1, 2);
-datasetMotor.writeDataSet(this.dataTemperature, 1, 2, 1); //nro de hoja, fila de arranque, columna de arranque]]></Body>
+					<Body><![CDATA[// Exportar datos filtrados al Excel
+int row = 2; // Fila inicial en Excel
+
+datasetMotor.setCellValue("Temperatura [°C]", 1, 1, 2);
+datasetMotor.setCellValue("Vibraciones [mm/s]", 1, 1, 4);
+datasetMotor.setCellValue("Corriente [A]", 1, 1, 6);
+
+for (int i = 0; i < dataTemperature.size(); i++) {
+    double recordedTime = dataTemperature.getX(i); 			// Tiempo
+    double recordedTemperature = dataTemperature.getY(i); 	// Temperatura
+    double recordedVibration = dataVibration.getY(i); 		// Vibración
+    double recordedCurrent = dataCurrent.getY(i); 			// Corriente
+
+    // Filtrar valores de temperatura mayores a 0
+    if (recordedTemperature > 0) {
+        datasetMotor.setCellValue(recordedTime, "Dataset", row, 1); 		// Columna 1: Tiempo temperatura
+        datasetMotor.setCellValue(recordedTemperature, "Dataset", row, 2); 	// Columna 2: Temperatura
+  
+        datasetMotor.setCellValue(recordedTime, "Dataset", row, 3); 		// Columna3: Tiempo vibraciones
+        datasetMotor.setCellValue(recordedVibration, "Dataset", row, 4); 		// Columna 4: Vibraciones
+
+        datasetMotor.setCellValue(recordedTime, "Dataset", row, 5); 		// Columna 5: Tiempo corriente
+        datasetMotor.setCellValue(recordedCurrent, "Dataset", row, 6); 		// Columna 6: Corriente
+
+        row++;	// Avanzar a la siguiente fila
+    }
+}]]></Body>
 				</Function>
 			</Functions>
 			<AnalysisData>
@@ -417,7 +442,7 @@ datasetMotor.writeDataSet(this.dataTemperature, 1, 2, 1); //nro de hoja, fila de
 					<ShowLabel>true</ShowLabel>
 					<ResourceReference>
 						<PackageName><![CDATA[cintatransportadora]]></PackageName>
-						<ClassName><![CDATA[C:/Users/Usuario/Downloads/datasetMotor.xlsx]]></ClassName>
+						<ClassName><![CDATA[C:/Users/marti/Downloads/datasetMotor.xlsx]]></ClassName>
 					</ResourceReference>
 					<SaveInSnapshot>false</SaveInSnapshot>
 					<LoadOnStartup>true</LoadOnStartup>
@@ -1031,7 +1056,7 @@ datasetMotor.writeDataSet(this.dataTemperature, 1, 2, 1); //nro de hoja, fila de
 	</Experiments>
 	<ModelResources>
 		<Resource>
-			<Path><![CDATA[C:/Users/Usuario/Downloads/datasetMotor.xlsx]]></Path>
+			<Path><![CDATA[C:/Users/marti/Downloads/datasetMotor.xlsx]]></Path>
 			<ReferencedFromUserCode>false</ReferencedFromUserCode>
 			<Location>FILE_SYSTEM</Location>
 		</Resource>
