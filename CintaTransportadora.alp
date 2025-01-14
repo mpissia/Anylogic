@@ -137,7 +137,7 @@
 					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
 						<Type><![CDATA[double]]></Type>        
 						<InitialValue Class="CodeValue">
-							<Code><![CDATA[0.01]]></Code>
+							<Code><![CDATA[0.5]]></Code>
 						</InitialValue>
 					</Properties>
 				</Variable>
@@ -186,12 +186,27 @@
 						</InitialValue>
 					</Properties>
 				</Variable>
+				<Variable Class="PlainVariable">
+					<Id>1736894828538</Id>
+					<Name><![CDATA[motorState]]></Name>
+					<X>540</X><Y>40</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
+						<Type><![CDATA[String]]></Type>        
+						<InitialValue Class="CodeValue">
+							<Code><![CDATA["Normal"]]></Code>
+						</InitialValue>
+					</Properties>
+				</Variable>
 			</Variables>
 			<Connectors>
 				<Connector>
 					<Id>1736291794569</Id>
 					<Name><![CDATA[connector]]></Name>
-					<X>360</X><Y>130</Y>
+					<X>370</X><Y>130</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -218,13 +233,13 @@
 					</TargetConnectableItemReference>
 					<Points>
 						<Point><X>0</X><Y>0</Y></Point>
-						<Point><X>-100</X><Y>0</Y></Point>
+						<Point><X>-110</X><Y>0</Y></Point>
 					</Points>
 				</Connector>
 				<Connector>
-					<Id>1736291805400</Id>
+					<Id>1736895308653</Id>
 					<Name><![CDATA[connector1]]></Name>
-					<X>220</X><Y>130</Y>
+					<X>110</X><Y>130</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -232,26 +247,26 @@
 					<SourceEmbeddedObjectReference>
 						<PackageName><![CDATA[cintatransportadora]]></PackageName>
 						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[CintaTransportadora]]></ItemName>
+						<ItemName><![CDATA[EntradaProductos]]></ItemName>
 					</SourceEmbeddedObjectReference>
 					<SourceConnectableItemReference>
 						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
-						<ClassName><![CDATA[Conveyor]]></ClassName>
-						<ItemName><![CDATA[in]]></ItemName>
+						<ClassName><![CDATA[Source]]></ClassName>
+						<ItemName><![CDATA[out]]></ItemName>
 					</SourceConnectableItemReference>
 					<TargetEmbeddedObjectReference>
 						<PackageName><![CDATA[cintatransportadora]]></PackageName>
 						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[EntradaProductos]]></ItemName>
+						<ItemName><![CDATA[CintaTransportadora]]></ItemName>
 					</TargetEmbeddedObjectReference>
 					<TargetConnectableItemReference>
 						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
-						<ClassName><![CDATA[Source]]></ClassName>
-						<ItemName><![CDATA[out]]></ItemName>
+						<ClassName><![CDATA[Conveyor]]></ClassName>
+						<ItemName><![CDATA[in]]></ItemName>
 					</TargetConnectableItemReference>
 					<Points>
 						<Point><X>0</X><Y>0</Y></Point>
-						<Point><X>-90</X><Y>0</Y></Point>
+						<Point><X>110</X><Y>0</Y></Point>
 					</Points>
 				</Connector>
 			</Connectors>
@@ -303,13 +318,26 @@ if (buttonPressed) {
 }
 
 // Actualización de temperatura
-temperature += (effortLevel - coolingRate * (temperature - ambientTemperature)) * timeStep;
+//temperature += (effortLevel - coolingRate * (temperature - ambientTemperature)) * timeStep;
+temperature += uniform(0.1, 0.02); // Aumento leve de temperatura
 
 // Actualización de vibraciones
-vibration = baseVibration + effortLevel * vibrationFactor + this.uniform(-0.05, 0.05);
+//vibration = baseVibration + effortLevel * vibrationFactor + this.uniform(-0.05, 0.05);
+vibration = uniform(0.5, 0.1); // Vibraciones aleatorias
 
 // Actualización de corriente
-current = baseCurrent + effortLevel * currentFactor;
+//current = baseCurrent + effortLevel * currentFactor;
+current = 5 + temperature * 0.05; // Corriente en función de la temperatura
+
+// Lógica para limitar variables
+if (temperature > 70) temperature = 70; // Máximo permitido
+if (vibration < 0) vibration = 0; // Vibración no negativa
+
+if (temperature > 60 || vibration > 1.0 || current > 10) {
+    motorState = "Fault";
+} else {
+    motorState = "Normal";
+}
 
 // Guardar datos en colecciones
 dataTemperature.add(time(), temperature);
@@ -317,8 +345,8 @@ dataVibration.add(time(), vibration);
 dataCurrent.add(time(), current);
 
 // Mostrar valores en el log
-System.out.println("Temperatura: " + temperature + " °C, Vibración: " + vibration + ", Corriente: " + current + " A");
-System.out.println("Esfuezo: " + effortLevel + ", Velocidad de enfriamiento: " + coolingRate);
+System.out.println("Temperatura: " + temperature + " °C, Vibración: " + vibration + ", Corriente: " + current + " A\n");
+//System.out.println("Esfuezo: " + effortLevel + ", Velocidad de enfriamiento: " + coolingRate);
 
 ]]></Action>
 				</Event>
@@ -329,7 +357,7 @@ System.out.println("Esfuezo: " + effortLevel + ", Velocidad de enfriamiento: " +
 					<ReturnType><![CDATA[double]]></ReturnType>
 					<Id>1736713858243</Id>
 					<Name><![CDATA[writeOutput]]></Name>
-					<X>230</X><Y>320</Y>
+					<X>220</X><Y>310</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -338,7 +366,7 @@ System.out.println("Esfuezo: " + effortLevel + ", Velocidad de enfriamiento: " +
 int row = 2; // Fila inicial en Excel
 
 datasetMotor.setCellValue("Temperatura [°C]", 1, 1, 2);
-datasetMotor.setCellValue("Vibraciones [mm/s]", 1, 1, 4);
+datasetMotor.setCellValue("Vibraciones [g]", 1, 1, 4);
 datasetMotor.setCellValue("Corriente [A]", 1, 1, 6);
 
 for (int i = 0; i < dataTemperature.size(); i++) {
@@ -384,7 +412,7 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 						<Unit Class="TimeUnits"><![CDATA[SECOND]]></Unit>
 					</RecurrenceCode>
 					<FreezeXAxis>true</FreezeXAxis>
-					<SamplesToKeep>100</SamplesToKeep>
+					<SamplesToKeep>1000</SamplesToKeep>
 				</DataSet>
     			<DataSet>
 					<Id>1736461864431</Id>
@@ -406,7 +434,7 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 						<Unit Class="TimeUnits"><![CDATA[SECOND]]></Unit>
 					</RecurrenceCode>
 					<FreezeXAxis>true</FreezeXAxis>
-					<SamplesToKeep>100</SamplesToKeep>
+					<SamplesToKeep>1000</SamplesToKeep>
 				</DataSet>
     			<DataSet>
 					<Id>1736461876359</Id>
@@ -428,7 +456,7 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 						<Unit Class="TimeUnits"><![CDATA[SECOND]]></Unit>
 					</RecurrenceCode>
 					<FreezeXAxis>true</FreezeXAxis>
-					<SamplesToKeep>100</SamplesToKeep>
+					<SamplesToKeep>1000</SamplesToKeep>
 				</DataSet>
 			</AnalysisData>
 			<Connectivity>
@@ -442,7 +470,7 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 					<ShowLabel>true</ShowLabel>
 					<ResourceReference>
 						<PackageName><![CDATA[cintatransportadora]]></PackageName>
-						<ClassName><![CDATA[C:/Users/marti/Downloads/datasetMotor.xlsx]]></ClassName>
+						<ClassName><![CDATA[C:/Users/Usuario/Downloads/datasetMotor.xlsx]]></ClassName>
 					</ResourceReference>
 					<SaveInSnapshot>false</SaveInSnapshot>
 					<LoadOnStartup>true</LoadOnStartup>
@@ -475,7 +503,7 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 				<EmbeddedObject>
 					<Id>1736291637766</Id>
 					<Name><![CDATA[EntradaProductos]]></Name>
-					<X>100</X><Y>120</Y>
+					<X>80</X><Y>120</Y>
 					<Label><X>-5</X><Y>-20</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -498,8 +526,8 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 						<Parameter>
 							<Name><![CDATA[rate]]></Name>
 							<Value Class="CodeUnitValue">
-								<Code><![CDATA[10]]></Code>
-								<Unit Class="RateUnits"><![CDATA[PER_HOUR]]></Unit>
+								<Code><![CDATA[5]]></Code>
+								<Unit Class="RateUnits"><![CDATA[PER_MINUTE]]></Unit>
 							</Value>
 						</Parameter>
 						<Parameter>
@@ -585,6 +613,47 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[newEntity]]></Name>
+							<Value Class="EntityCodeValue">
+								<IsAgentEntity>true</IsAgentEntity>
+								<EntityEmbeddedObject>
+									<ActiveObjectClass>
+										<PackageName><![CDATA[cintatransportadora]]></PackageName>
+										<ClassName><![CDATA[Caja]]></ClassName>
+									</ActiveObjectClass>
+									<GenericParameterSubstitute>
+										<GenericParameterSubstituteReference>
+											<PackageName><![CDATA[cintatransportadora]]></PackageName>
+											<ClassName><![CDATA[Caja]]></ClassName>
+											<ItemName><![CDATA[1736893703229]]></ItemName>
+										</GenericParameterSubstituteReference>
+									</GenericParameterSubstitute>
+									<Parameters>
+									</Parameters>
+									<ReplicationFlag>true</ReplicationFlag>
+									<Replication Class="CodeValue">
+										<Code><![CDATA[100]]></Code>
+									</Replication>
+									<CollectionType>ARRAY_LIST_BASED</CollectionType>
+									<InitialLocationType>XYZ</InitialLocationType>
+									<ColumnCode Class="CodeValue">
+										<Code><![CDATA[0]]></Code>
+									</ColumnCode>
+									<RowCode Class="CodeValue">
+										<Code><![CDATA[0]]></Code>
+									</RowCode>
+									<LocationNameCode Class="CodeValue">
+										<Code><![CDATA[""]]></Code>
+									</LocationNameCode>
+									<InitializationType>LOAD_FROM_DATABASE</InitializationType>
+									<InitializationDatabaseTableQuery>
+										<TableReference>
+										</TableReference>
+									</InitializationDatabaseTableQuery>
+									<InitializationDatabaseType>ONE_AGENT_PER_DATABASE_RECORD</InitializationDatabaseType>
+									<QuantityColumn>
+									</QuantityColumn>
+								</EntityEmbeddedObject>
+							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[changeDimensions]]></Name>
@@ -679,7 +748,7 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 						<Parameter>
 							<Name><![CDATA[length]]></Name>
 							<Value Class="CodeUnitValue">
-								<Code><![CDATA[50]]></Code>
+								<Code><![CDATA[10]]></Code>
 								<Unit Class="LengthUnits"><![CDATA[METER]]></Unit>
 							</Value>
 						</Parameter>
@@ -706,6 +775,14 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[onEnter]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[if (motorState.equals("Fault")) {
+    this.setSpeed(0); // Detener la cinta transportadora
+} else {
+    this.setSpeed(1); // Velocidad normal
+}
+]]></Code>
+							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[onFullEnter]]></Name>
@@ -750,7 +827,7 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 				<EmbeddedObject>
 					<Id>1736291779529</Id>
 					<Name><![CDATA[SalidaProductos]]></Name>
-					<X>360</X><Y>120</Y>
+					<X>370</X><Y>120</Y>
 					<Label><X>-10</X><Y>-20</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -950,6 +1027,140 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 			</Presentation>
 
 		</ActiveObjectClass>
+		<!--   =========   Active Object Class   ========  -->
+		<ActiveObjectClass>
+			<Id>1736893703223</Id>
+			<Name><![CDATA[Caja]]></Name>
+			<Generic>false</Generic>
+			<GenericParameter>
+				<Id>1736893703229</Id>
+				<Name><![CDATA[1736893703229]]></Name>
+				<GenericParameterValue Class="CodeValue">
+					<Code><![CDATA[T extends Agent]]></Code>
+				</GenericParameterValue>
+				<GenericParameterLabel><![CDATA[Generic parameter:]]></GenericParameterLabel>
+			</GenericParameter>
+			<FlowChartsUsage>ENTITY</FlowChartsUsage>
+			<SamplesToKeep>100</SamplesToKeep>
+			<LimitNumberOfArrayElements>false</LimitNumberOfArrayElements>
+			<ElementsLimitValue>100</ElementsLimitValue>
+			<MakeDefaultViewArea>true</MakeDefaultViewArea>
+			<SceneGridColor/>
+			<SceneBackgroundColor/>
+			<SceneSkybox>null</SceneSkybox>
+			<AgentProperties>
+				<EnvironmentDefinesInitialLocation>true</EnvironmentDefinesInitialLocation>
+				<RotateAnimationTowardsMovement>true</RotateAnimationTowardsMovement>
+				<RotateAnimationVertically>false</RotateAnimationVertically>
+				<VelocityCode Class="CodeUnitValue">
+					<Code><![CDATA[10]]></Code>
+					<Unit Class="SpeedUnits"><![CDATA[MPS]]></Unit>
+				</VelocityCode>
+				<PhysicalLength Class="CodeUnitValue">
+					<Code><![CDATA[1]]></Code>
+					<Unit Class="LengthUnits"><![CDATA[METER]]></Unit>
+				</PhysicalLength>
+				<PhysicalWidth Class="CodeUnitValue">
+					<Code><![CDATA[1]]></Code>
+					<Unit Class="LengthUnits"><![CDATA[METER]]></Unit>
+				</PhysicalWidth>
+				<PhysicalHeight Class="CodeUnitValue">
+					<Code><![CDATA[1]]></Code>
+					<Unit Class="LengthUnits"><![CDATA[METER]]></Unit>
+				</PhysicalHeight>
+			</AgentProperties>
+			<EnvironmentProperties>
+					<EnableSteps>false</EnableSteps>
+					<StepDurationCode Class="CodeUnitValue">
+						<Code><![CDATA[1.0]]></Code>
+						<Unit Class="TimeUnits"><![CDATA[SECOND]]></Unit>
+					</StepDurationCode>
+					<SpaceType>CONTINUOUS</SpaceType>
+					<WidthCode><![CDATA[500]]></WidthCode>
+					<HeightCode><![CDATA[500]]></HeightCode>
+					<ZHeightCode><![CDATA[0]]></ZHeightCode>
+					<ColumnsCountCode><![CDATA[100]]></ColumnsCountCode>
+					<RowsCountCode><![CDATA[100]]></RowsCountCode>
+					<NeigborhoodType>MOORE</NeigborhoodType>
+					<LayoutType>USER_DEF</LayoutType>
+					<NetworkType>USER_DEF</NetworkType>
+					<ConnectionsPerAgentCode><![CDATA[2]]></ConnectionsPerAgentCode>
+					<ConnectionsRangeCode><![CDATA[50]]></ConnectionsRangeCode>
+					<NeighborLinkFractionCode><![CDATA[0.95]]></NeighborLinkFractionCode>
+					<MCode><![CDATA[10]]></MCode>
+			</EnvironmentProperties>
+			<DatasetsCreationProperties>
+				<AutoCreate>true</AutoCreate>
+					<OccurrenceAtTime>true</OccurrenceAtTime>
+					<OccurrenceDate>1736928000000</OccurrenceDate>
+					<OccurrenceTime Class="CodeUnitValue">
+						<Code><![CDATA[0]]></Code>
+						<Unit Class="TimeUnits"><![CDATA[SECOND]]></Unit>
+					</OccurrenceTime>
+					<RecurrenceCode Class="CodeUnitValue">
+						<Code><![CDATA[1]]></Code>
+						<Unit Class="TimeUnits"><![CDATA[SECOND]]></Unit>
+					</RecurrenceCode>
+			</DatasetsCreationProperties>
+			<ScaleRuler>
+				<Id>1736893703226</Id>
+				<Name><![CDATA[scale]]></Name>
+				<X>0</X><Y>-150</Y>
+				<PublicFlag>false</PublicFlag>
+				<PresentationFlag>false</PresentationFlag>
+				<ShowLabel>false</ShowLabel>
+				<DrawMode>SHAPE_DRAW_2D3D</DrawMode>
+				<Length>100</Length>
+				<Rotation>0</Rotation>
+				<ScaleType>BASED_ON_LENGTH</ScaleType>
+				<ModelLength>10</ModelLength>
+				<LengthUnits>METER</LengthUnits>
+				<Scale>10</Scale>
+				<InheritedFromParentAgentType>true</InheritedFromParentAgentType>
+			</ScaleRuler>
+			<CurrentLevel>1736893703230</CurrentLevel>
+			<ConnectionsId>1736893703224</ConnectionsId>
+			<AgentLinks>
+				<AgentLink>
+					<Id>1736893703224</Id>
+					<Name><![CDATA[connections]]></Name>
+					<X>50</X><Y>-50</Y>
+					<Label><X>15</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<HandleReceiveInConnections>false</HandleReceiveInConnections>
+					<AgentLinkType>COLLECTION_OF_LINKS</AgentLinkType>
+					<AgentLinkBidirectional>true</AgentLinkBidirectional>
+					<MessageType><![CDATA[Object]]></MessageType>
+					<LineStyle>SOLID</LineStyle>
+					<LineWidth>1</LineWidth>
+					<LineColor>-16777216</LineColor>
+					<LineZOrder>UNDER_AGENTS</LineZOrder>
+					<LineArrow>NONE</LineArrow>
+					<LineArrowPosition>END</LineArrowPosition>
+				</AgentLink>
+			</AgentLinks>
+
+
+			<Presentation>
+				<Level>
+					<Id>1736893703230</Id>
+					<Name><![CDATA[level]]></Name>
+					<X>0</X><Y>0</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>true</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>false</ShowLabel>
+					<DrawMode>SHAPE_DRAW_2D3D</DrawMode>
+					<Z>0</Z>
+					<LevelVisibility>DIM_NON_CURRENT</LevelVisibility>
+
+
+				</Level>
+			</Presentation>
+
+		</ActiveObjectClass>
 	</ActiveObjectClasses>
 	<DifferentialEquationsMethod>EULER</DifferentialEquationsMethod>
 	<MixedEquationsMethod>RK45_NEWTON</MixedEquationsMethod>
@@ -1056,7 +1267,7 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 	</Experiments>
 	<ModelResources>
 		<Resource>
-			<Path><![CDATA[C:/Users/marti/Downloads/datasetMotor.xlsx]]></Path>
+			<Path><![CDATA[C:/Users/Usuario/Downloads/datasetMotor.xlsx]]></Path>
 			<ReferencedFromUserCode>false</ReferencedFromUserCode>
 			<Location>FILE_SYSTEM</Location>
 		</Resource>
