@@ -366,8 +366,8 @@ System.out.println("Temperatura: " + temperature + " °C, Vibración: " + vibrat
 int row = 2; // Fila inicial en Excel
 
 datasetMotor.setCellValue("Temperatura [°C]", 1, 1, 2);
-datasetMotor.setCellValue("Vibraciones [g]", 1, 1, 4);
-datasetMotor.setCellValue("Corriente [A]", 1, 1, 6);
+datasetMotor.setCellValue("Vibraciones [g]", 1, 1, 3);
+datasetMotor.setCellValue("Corriente [A]", 1, 1, 4);
 
 for (int i = 0; i < dataTemperature.size(); i++) {
     double recordedTime = dataTemperature.getX(i); 			// Tiempo
@@ -380,11 +380,11 @@ for (int i = 0; i < dataTemperature.size(); i++) {
         datasetMotor.setCellValue(recordedTime, "Dataset", row, 1); 		// Columna 1: Tiempo temperatura
         datasetMotor.setCellValue(recordedTemperature, "Dataset", row, 2); 	// Columna 2: Temperatura
   
-        datasetMotor.setCellValue(recordedTime, "Dataset", row, 3); 		// Columna3: Tiempo vibraciones
-        datasetMotor.setCellValue(recordedVibration, "Dataset", row, 4); 		// Columna 4: Vibraciones
+        //datasetMotor.setCellValue(recordedTime, "Dataset", row, 3); 		// Columna3: Tiempo vibraciones
+        datasetMotor.setCellValue(recordedVibration, "Dataset", row, 3); 		// Columna 4: Vibraciones
 
-        datasetMotor.setCellValue(recordedTime, "Dataset", row, 5); 		// Columna 5: Tiempo corriente
-        datasetMotor.setCellValue(recordedCurrent, "Dataset", row, 6); 		// Columna 6: Corriente
+        //datasetMotor.setCellValue(recordedTime, "Dataset", row, 5); 		// Columna 5: Tiempo corriente
+        datasetMotor.setCellValue(recordedCurrent, "Dataset", row, 4); 		// Columna 6: Corriente
 
         row++;	// Avanzar a la siguiente fila
     }
