@@ -95,7 +95,7 @@
 			<ScaleRuler>
 				<Id>1736291569725</Id>
 				<Name><![CDATA[scale]]></Name>
-				<X>380</X><Y>580</Y>
+				<X>390</X><Y>580</Y>
 				<PublicFlag>false</PublicFlag>
 				<PresentationFlag>false</PresentationFlag>
 				<ShowLabel>false</ShowLabel>
