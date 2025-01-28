@@ -191,7 +191,7 @@
 				<Connector>
 					<Id>1737500121435</Id>
 					<Name><![CDATA[connector]]></Name>
-					<X>250</X><Y>280</Y>
+					<X>270</X><Y>310</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -224,7 +224,7 @@
 				<Connector>
 					<Id>1737500141397</Id>
 					<Name><![CDATA[connector1]]></Name>
-					<X>470</X><Y>280</Y>
+					<X>490</X><Y>310</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -288,20 +288,23 @@
 					<Action><![CDATA[// Parámetros del motor en función de las condiciones de operación
 
 // Relación entre cantidad de cajas por unidad de tiempo y carga en el motor
-//double motorLoad = boxRate.getValue() * conveyorSpeed.getValue();
+double motorLoad = boxRate.getValue() * conveyorSpeed.getValue();
 
 // Actualizar temperatura (Ejemplo: aumenta linealmente con la carga)
-//temperature = 25 + motorLoad * 0.05; // 25°C base + incremento proporcional a la carga
+temperature = 25 + motorLoad * 0.05; // 25°C base + incremento proporcional a la carga
 
 // Actualizar vibración (Ejemplo: más cajas y velocidad generan más vibración)
-//vibration = 0.5 + (0.01 * motorLoad); // Vibración base más un factor proporcional
+vibration = 0.5 + (0.01 * motorLoad); // Vibración base más un factor proporcional
 
 // Actualizar corriente (Ejemplo: corriente crece con la carga del motor)
-//current = 2 + (0.002 * motorLoad); // Corriente base más incremento según carga
+current = 2 + (0.002 * motorLoad); // Corriente base más incremento según carga
 
-temperature += uniform(0.1, 0.3);    // Aumento gradual de temperatura
-current += uniform(0.01, 0.05);      // Aumento gradual de corriente
-vibration += normal(0, 0.1);         // Variación aleatoria de vibración
+if (temperature > 80 || vibration > 5 || current > 10) {
+    motorState = true;
+    // Opcional: puedes incluir un mensaje o acción adicional aquí
+} else {
+    motorState = false;
+}
 
 // Guardar datos en colecciones
 dataTemperature.add(time(), temperature);
@@ -316,6 +319,7 @@ dataFailure.add(time(), motorState ? 1 : 0);
 				<Event>
 					<Id>1738014202465</Id>
 					<Name><![CDATA[faultSimulation]]></Name>
+					<ExcludeFromBuild>true</ExcludeFromBuild>
 					<X>300</X><Y>90</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
@@ -343,7 +347,7 @@ dataFailure.add(time(), motorState ? 1 : 0);
 						<Condition><![CDATA[temperature>90]]></Condition>
 					</Properties>
 					<Action><![CDATA[// Activar alarma si alguno de los parámetros supera su umbral
-if (temperature > 80 || vibration > 5 || current > 6) {
+if (temperature > 80 || vibration > 5 || current > 10) {
     motorState = true;
     // Opcional: puedes incluir un mensaje o acción adicional aquí
 } else {
@@ -357,7 +361,7 @@ if (temperature > 80 || vibration > 5 || current > 6) {
 					<ReturnType><![CDATA[double]]></ReturnType>
 					<Id>1736713858243</Id>
 					<Name><![CDATA[writeOutput]]></Name>
-					<X>180</X><Y>120</Y>
+					<X>190</X><Y>120</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -375,6 +379,7 @@ for (int i = 0; i < dataTemperature.size(); i++) {
     double recordedTemperature = dataTemperature.getY(i); 	// Temperatura
     double recordedVibration = dataVibration.getY(i); 		// Vibración
     double recordedCurrent = dataCurrent.getY(i); 			// Corriente
+    double recordedFailure = dataFailure.getY(i); 			// Estado Motor
 
     // Filtrar valores de temperatura mayores a 0
     if (recordedTemperature > 0) {
@@ -382,14 +387,13 @@ for (int i = 0; i < dataTemperature.size(); i++) {
         datasetMotor.setCellValue(recordedTemperature, "Dataset", row, 2); 	// Columna 2: Temperatura
         datasetMotor.setCellValue(recordedVibration, "Dataset", row, 3); 	// Columna 3: Vibraciones
         datasetMotor.setCellValue(recordedCurrent, "Dataset", row, 4); 		// Columna 4: Corriente
+        datasetMotor.setCellValue(recordedFailure, "Dataset", row, 5); 	// Columna 5: Estado Motor
 
         row++;	// Avanzar a la siguiente fila
     }
 }
-for (int j = 0; j < dataFailure.size(); j++) {
-	double recordedFailure = dataFailure.getY(j); 			// Estado Motor
-	datasetMotor.setCellValue(recordedFailure, "Dataset", row, 5); 		// Columna 5: Estado motor
-}]]></Body>
+
+	]]></Body>
 				</Function>
 			</Functions>
 			<AnalysisData>
@@ -460,14 +464,14 @@ for (int j = 0; j < dataFailure.size(); j++) {
 					<SamplesToKeep>1000</SamplesToKeep>
 				</DataSet>
     			<DataSet>
-					<Id>1738022341169</Id>
+					<Id>1738033050002</Id>
 					<Name><![CDATA[dataFailure]]></Name>
 					<X>30</X><Y>210</Y>
 					<Label><X>15</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
 					<ShowLabel>true</ShowLabel>
-					<AutoUpdate>false</AutoUpdate>
+					<AutoUpdate>true</AutoUpdate>
 					<OccurrenceAtTime>true</OccurrenceAtTime>
 					<OccurrenceDate>1738051200000</OccurrenceDate>
 					<OccurrenceTime Class="CodeUnitValue">
@@ -479,7 +483,7 @@ for (int j = 0; j < dataFailure.size(); j++) {
 						<Unit Class="TimeUnits"><![CDATA[SECOND]]></Unit>
 					</RecurrenceCode>
 					<FreezeXAxis>true</FreezeXAxis>
-					<SamplesToKeep>100</SamplesToKeep>
+					<SamplesToKeep>1000</SamplesToKeep>
 				</DataSet>
 			</AnalysisData>
 			<Connectivity>
@@ -493,7 +497,7 @@ for (int j = 0; j < dataFailure.size(); j++) {
 					<ShowLabel>true</ShowLabel>
 					<ResourceReference>
 						<PackageName><![CDATA[cintatransportadora]]></PackageName>
-						<ClassName><![CDATA[C:/Users/Usuario/Downloads/datasetMotor.xlsx]]></ClassName>
+						<ClassName><![CDATA[C:/Users/marti/Downloads/datasetMotor.xlsx]]></ClassName>
 					</ResourceReference>
 					<SaveInSnapshot>false</SaveInSnapshot>
 					<LoadOnStartup>true</LoadOnStartup>
@@ -526,7 +530,7 @@ for (int j = 0; j < dataFailure.size(); j++) {
 				<EmbeddedObject>
 					<Id>1737499531086</Id>
 					<Name><![CDATA[conveyor]]></Name>
-					<X>350</X><Y>260</Y>
+					<X>370</X><Y>290</Y>
 					<Label><X>-10</X><Y>-10</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -620,7 +624,7 @@ for (int j = 0; j < dataFailure.size(); j++) {
 				<EmbeddedObject>
 					<Id>1737499648670</Id>
 					<Name><![CDATA[sourceBox]]></Name>
-					<X>220</X><Y>270</Y>
+					<X>240</X><Y>300</Y>
 					<Label><X>-5</X><Y>-20</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -801,7 +805,7 @@ for (int j = 0; j < dataFailure.size(); j++) {
 				<EmbeddedObject>
 					<Id>1737500138603</Id>
 					<Name><![CDATA[sinkBox]]></Name>
-					<X>470</X><Y>270</Y>
+					<X>490</X><Y>300</Y>
 					<Label><X>-10</X><Y>-20</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -956,7 +960,7 @@ for (int j = 0; j < dataFailure.size(); j++) {
 				 	<EmbeddedIcon>false</EmbeddedIcon>				
 					<Id>1738018832889</Id>
 					<Name><![CDATA[boxRate]]></Name>
-					<X>210</X><Y>160</Y>
+					<X>260</X><Y>210</Y>
 					<Label><X>25</X><Y>-10</Y></Label>
 					<PublicFlag>true</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -978,7 +982,7 @@ for (int j = 0; j < dataFailure.size(); j++) {
 				 	<EmbeddedIcon>false</EmbeddedIcon>				
 					<Id>1738018984495</Id>
 					<Name><![CDATA[conveyorSpeed]]></Name>
-					<X>340</X><Y>160</Y>
+					<X>380</X><Y>210</Y>
 					<Label><X>0</X><Y>-10</Y></Label>
 					<PublicFlag>true</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -996,29 +1000,6 @@ for (int j = 0; j < dataFailure.size(); j++) {
 						<LinkTo>false</LinkTo>
 					</ExtendedProperties>
 				</Control>
-				<Oval>
-					<Id>1738023859139</Id>
-					<Name><![CDATA[Alarma]]></Name>
-					<X>95</X><Y>335</Y>
-					<Label><X>-20</X><Y>0</Y></Label>
-					<PublicFlag>true</PublicFlag>
-					<PresentationFlag>true</PresentationFlag>
-					<ShowLabel>true</ShowLabel>
-					<DrawMode>SHAPE_DRAW_2D3D</DrawMode>
-					<EmbeddedIcon>false</EmbeddedIcon>
-					<Z>0</Z>
-					<ZHeight>10</ZHeight>
-					<LineWidth>1</LineWidth>
-					<LineColor>-16777216</LineColor>
-					<LineMaterial>null</LineMaterial>
-					<LineStyle>SOLID</LineStyle>
-					<RadiusX>55</RadiusX>
-					<RadiusY>40</RadiusY>
-					<Rotation>0.0</Rotation>
-					<FillColor>-1</FillColor>
-					<FillColorCode><![CDATA[motorState ? red : green]]></FillColorCode>
-					<FillMaterial>null</FillMaterial>
-				</Oval>
 			</Presentation>
 
 				</Level>
@@ -1131,7 +1112,7 @@ for (int j = 0; j < dataFailure.size(); j++) {
 	</Experiments>
 	<ModelResources>
 		<Resource>
-			<Path><![CDATA[C:/Users/Usuario/Downloads/datasetMotor.xlsx]]></Path>
+			<Path><![CDATA[C:/Users/marti/Downloads/datasetMotor.xlsx]]></Path>
 			<ReferencedFromUserCode>false</ReferencedFromUserCode>
 			<Location>FILE_SYSTEM</Location>
 		</Resource>
