@@ -191,7 +191,7 @@
 				<Connector>
 					<Id>1737500121435</Id>
 					<Name><![CDATA[connector]]></Name>
-					<X>150</X><Y>250</Y>
+					<X>270</X><Y>310</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -224,7 +224,7 @@
 				<Connector>
 					<Id>1737500141397</Id>
 					<Name><![CDATA[connector1]]></Name>
-					<X>370</X><Y>250</Y>
+					<X>490</X><Y>310</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -299,11 +299,18 @@ vibration = 0.5 + (0.01 * motorLoad); // Vibración base más un factor proporci
 // Actualizar corriente (Ejemplo: corriente crece con la carga del motor)
 current = 2 + (0.002 * motorLoad); // Corriente base más incremento según carga
 
+if (temperature > 80 || vibration > 5 || current > 10) {
+    motorState = true;
+    // Opcional: puedes incluir un mensaje o acción adicional aquí
+} else {
+    motorState = false;
+}
 
 // Guardar datos en colecciones
 dataTemperature.add(time(), temperature);
 dataVibration.add(time(), vibration);
 dataCurrent.add(time(), current);
+dataFailure.add(time(), motorState ? 1 : 0);
 
 
 
@@ -312,6 +319,7 @@ dataCurrent.add(time(), current);
 				<Event>
 					<Id>1738014202465</Id>
 					<Name><![CDATA[faultSimulation]]></Name>
+					<ExcludeFromBuild>true</ExcludeFromBuild>
 					<X>300</X><Y>90</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
@@ -353,7 +361,7 @@ if (temperature > 80 || vibration > 5 || current > 10) {
 					<ReturnType><![CDATA[double]]></ReturnType>
 					<Id>1736713858243</Id>
 					<Name><![CDATA[writeOutput]]></Name>
-					<X>180</X><Y>120</Y>
+					<X>190</X><Y>120</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -364,28 +372,28 @@ int row = 2; 												// Fila inicial en Excel
 datasetMotor.setCellValue("Temperatura [°C]", 1, 1, 2);
 datasetMotor.setCellValue("Vibraciones [mm/s]", 1, 1, 3);
 datasetMotor.setCellValue("Corriente [A]", 1, 1, 4);
-//datasetMotor.setCellValue("Estado Motor", 1, 1, 5);
+datasetMotor.setCellValue("Estado Motor", 1, 1, 5);
 
 for (int i = 0; i < dataTemperature.size(); i++) {
     double recordedTime = dataTemperature.getX(i); 			// Tiempo
     double recordedTemperature = dataTemperature.getY(i); 	// Temperatura
     double recordedVibration = dataVibration.getY(i); 		// Vibración
     double recordedCurrent = dataCurrent.getY(i); 			// Corriente
+    double recordedFailure = dataFailure.getY(i); 			// Estado Motor
 
     // Filtrar valores de temperatura mayores a 0
     if (recordedTemperature > 0) {
         datasetMotor.setCellValue(recordedTime, "Dataset", row, 1); 		// Columna 1: Tiempo temperatura
         datasetMotor.setCellValue(recordedTemperature, "Dataset", row, 2); 	// Columna 2: Temperatura
-  
-        //datasetMotor.setCellValue(recordedTime, "Dataset", row, 3); 		// Columna3: Tiempo vibraciones
-        datasetMotor.setCellValue(recordedVibration, "Dataset", row, 3); 	// Columna 4: Vibraciones
-
-        //datasetMotor.setCellValue(recordedTime, "Dataset", row, 5); 		// Columna 5: Tiempo corriente
-        datasetMotor.setCellValue(recordedCurrent, "Dataset", row, 4); 		// Columna 6: Corriente
+        datasetMotor.setCellValue(recordedVibration, "Dataset", row, 3); 	// Columna 3: Vibraciones
+        datasetMotor.setCellValue(recordedCurrent, "Dataset", row, 4); 		// Columna 4: Corriente
+        datasetMotor.setCellValue(recordedFailure, "Dataset", row, 5); 	// Columna 5: Estado Motor
 
         row++;	// Avanzar a la siguiente fila
     }
-}]]></Body>
+}
+
+	]]></Body>
 				</Function>
 			</Functions>
 			<AnalysisData>
@@ -455,6 +463,28 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 					<FreezeXAxis>true</FreezeXAxis>
 					<SamplesToKeep>1000</SamplesToKeep>
 				</DataSet>
+    			<DataSet>
+					<Id>1738033050002</Id>
+					<Name><![CDATA[dataFailure]]></Name>
+					<X>30</X><Y>210</Y>
+					<Label><X>15</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<AutoUpdate>true</AutoUpdate>
+					<OccurrenceAtTime>true</OccurrenceAtTime>
+					<OccurrenceDate>1738051200000</OccurrenceDate>
+					<OccurrenceTime Class="CodeUnitValue">
+						<Code><![CDATA[0]]></Code>
+						<Unit Class="TimeUnits"><![CDATA[SECOND]]></Unit>
+					</OccurrenceTime>
+					<RecurrenceCode Class="CodeUnitValue">
+						<Code><![CDATA[1]]></Code>
+						<Unit Class="TimeUnits"><![CDATA[SECOND]]></Unit>
+					</RecurrenceCode>
+					<FreezeXAxis>true</FreezeXAxis>
+					<SamplesToKeep>1000</SamplesToKeep>
+				</DataSet>
 			</AnalysisData>
 			<Connectivity>
 				<ExcelFile>
@@ -467,7 +497,7 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 					<ShowLabel>true</ShowLabel>
 					<ResourceReference>
 						<PackageName><![CDATA[cintatransportadora]]></PackageName>
-						<ClassName><![CDATA[C:/Users/Usuario/Downloads/datasetMotor.xlsx]]></ClassName>
+						<ClassName><![CDATA[C:/Users/marti/Downloads/datasetMotor.xlsx]]></ClassName>
 					</ResourceReference>
 					<SaveInSnapshot>false</SaveInSnapshot>
 					<LoadOnStartup>true</LoadOnStartup>
@@ -500,7 +530,7 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 				<EmbeddedObject>
 					<Id>1737499531086</Id>
 					<Name><![CDATA[conveyor]]></Name>
-					<X>250</X><Y>230</Y>
+					<X>370</X><Y>290</Y>
 					<Label><X>-10</X><Y>-10</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -594,7 +624,7 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 				<EmbeddedObject>
 					<Id>1737499648670</Id>
 					<Name><![CDATA[sourceBox]]></Name>
-					<X>120</X><Y>240</Y>
+					<X>240</X><Y>300</Y>
 					<Label><X>-5</X><Y>-20</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -775,7 +805,7 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 				<EmbeddedObject>
 					<Id>1737500138603</Id>
 					<Name><![CDATA[sinkBox]]></Name>
-					<X>370</X><Y>240</Y>
+					<X>490</X><Y>300</Y>
 					<Label><X>-10</X><Y>-20</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -930,7 +960,7 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 				 	<EmbeddedIcon>false</EmbeddedIcon>				
 					<Id>1738018832889</Id>
 					<Name><![CDATA[boxRate]]></Name>
-					<X>210</X><Y>160</Y>
+					<X>260</X><Y>210</Y>
 					<Label><X>25</X><Y>-10</Y></Label>
 					<PublicFlag>true</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -952,7 +982,7 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 				 	<EmbeddedIcon>false</EmbeddedIcon>				
 					<Id>1738018984495</Id>
 					<Name><![CDATA[conveyorSpeed]]></Name>
-					<X>340</X><Y>160</Y>
+					<X>380</X><Y>210</Y>
 					<Label><X>0</X><Y>-10</Y></Label>
 					<PublicFlag>true</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -1082,7 +1112,7 @@ for (int i = 0; i < dataTemperature.size(); i++) {
 	</Experiments>
 	<ModelResources>
 		<Resource>
-			<Path><![CDATA[C:/Users/Usuario/Downloads/datasetMotor.xlsx]]></Path>
+			<Path><![CDATA[C:/Users/marti/Downloads/datasetMotor.xlsx]]></Path>
 			<ReferencedFromUserCode>false</ReferencedFromUserCode>
 			<Location>FILE_SYSTEM</Location>
 		</Resource>
